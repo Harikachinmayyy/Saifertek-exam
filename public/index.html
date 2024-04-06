@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern File Server</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type=text], textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        #fileList a {
+            text-decoration: none;
+            color: #337ab7;
+        }
+        #fileList a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Modern File Server</h1>
+    <form id="fileForm">
+        <input type="text" name="filename" placeholder="Enter filename"><br>
+        <textarea name="content" placeholder="Enter file content"></textarea><br>
+        <button type="submit">Upload File</button>
+    </form>
+    
+    <div id="fileList"></div>
+
+    <script>
+        // Event listener for form submission
+        document.getElementById('fileForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/createFile', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(message => {
+                alert(message);
+                this.reset(); // Reset form fields after successful upload
+                fetchFileList(); // Refresh file list
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        // Function to fetch and display file list
+        function fetchFileList() {
+            fetch('/getFiles')
+            .then(response => response.json())
+            .then(files => {
+                const fileList = document.getElementById('fileList');
+                fileList.innerHTML = ''; // Clear existing file list
+                files.forEach(file => {
+                    const link = document.createElement('a');
+                    link.href = `/getFile/${file}`;
+                    link.textContent = file;
+                    fileList.appendChild(link);
+                    fileList.appendChild(document.createElement('br'));
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Fetch file list when the page loads
+        document.addEventListener('DOMContentLoaded', fetchFileList);
+    </script>
+</body>
+</html>
